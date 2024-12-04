@@ -8,7 +8,8 @@ public class EntryPoint
     {
         //Day1.Index();
         //Day2.Index();
-        Day3.Index();
+        //Day3.Index();
+        Day4.Index();
     }
     
 }
