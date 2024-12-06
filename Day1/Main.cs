@@ -1,4 +1,4 @@
-using ConsoleApp1;
+using BenchmarkDotNet.Running;
 
 namespace AdventOfCode2024;
 
@@ -9,7 +9,10 @@ public class EntryPoint
         //Day1.Index();
         //Day2.Index();
         //Day3.Index();
-        Day4.Index();
+        // Day4.Index();
+        //Day5.Index();
+        // Day6.Index();
+        BenchmarkRunner.Run<Day6>();
     }
     
 }
