@@ -1,19 +1,18 @@
 namespace AdventOfCode2024;
 
-public class Day4
+public class Day4 : IAocDay
 {
     private static string[] input;
 
-    public static void Index()
+    public static void Initialize()
     {
         Console.WriteLine("Day 4");
-        input = File.ReadAllLines("../../../data-aoc-day4.txt");
-        //part1();
-        part2();
+        input = File.ReadAllLines("../../../Day4/1data-aoc-day4.txt");
     }
 
-    private static void part1()
+    public static void RunPart1()
     {
+        Initialize();
         int sum = 0;
         for (int i = 0; i < input.Length; i++)
         {
@@ -29,8 +28,9 @@ public class Day4
         Console.WriteLine(sum);
     }
 
-    private static void part2()
+    public static void RunPart2()
     {
+        Initialize();
         int sum = 0;
         for (int i = 0; i < input.Length; i++)
         {
