@@ -45,7 +45,7 @@ public class Day7 : IAocDay
     {
         if (index == operands.Length)
         {
-            Console.WriteLine("End of current calculation");
+            // Console.WriteLine("End of current calculation");
             resultsArray.Add(sum);
             return;
         }
@@ -55,8 +55,14 @@ public class Day7 : IAocDay
             return;
         }
         
+        if(sum>answer)
+        {
+            return;
+        }
+        
         recursiveCalculation(operands, index + 1, sum * operands[index], answer, resultsArray);
         recursiveCalculation(operands, index + 1, sum + operands[index], answer, resultsArray);
+        recursiveCalculation(operands, index + 1, long.Parse(sum.ToString() + operands[index].ToString()), answer, resultsArray);
     }
 
     public static void RunPart2()
