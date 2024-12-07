@@ -1,5 +1,8 @@
-namespace AdventOfCode2024.Day7;
+using BenchmarkDotNet.Attributes;
 
+namespace AdventOfCode2024;
+
+[MemoryDiagnoser]
 public class Day7 : IAocDay
 {
     private static string[] _input;
@@ -38,35 +41,44 @@ public class Day7 : IAocDay
             }
         }
 
-        Console.WriteLine($"Total value is : {total}");
+        // Console.WriteLine($"Total value is : {total}");
     }
 
-    private static void recursiveCalculation(long[] operands, int index, long sum, long answer, HashSet<long> resultsArray)
+    private static void recursiveCalculation(long[] operands, int index, long sum, long answer,
+        HashSet<long> resultsSet)
     {
         if (index == operands.Length)
         {
             // Console.WriteLine("End of current calculation");
-            resultsArray.Add(sum);
+            resultsSet.Add(sum);
             return;
         }
 
-        if (resultsArray.Contains(answer))
+        if (resultsSet.Contains(answer))
         {
             return;
         }
-        
-        if(sum>answer)
+
+        if (sum > answer)
         {
             return;
         }
-        
-        recursiveCalculation(operands, index + 1, sum * operands[index], answer, resultsArray);
-        recursiveCalculation(operands, index + 1, sum + operands[index], answer, resultsArray);
-        recursiveCalculation(operands, index + 1, long.Parse(sum.ToString() + operands[index].ToString()), answer, resultsArray);
+
+        recursiveCalculation(operands, index + 1, sum * operands[index], answer, resultsSet);
+        recursiveCalculation(operands, index + 1, sum + operands[index], answer, resultsSet);
+        // Part 2
+        recursiveCalculation(operands, index + 1, long.Parse(sum.ToString() + operands[index].ToString()), answer,
+            resultsSet);
     }
 
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        RunPart1();
     }
+
+    [Benchmark]
+    public void BenchmarkPart1() => Day7.RunPart1();
+
+    [Benchmark]
+    public void BenchmarkPart2() => Day7.RunPart2();
 }

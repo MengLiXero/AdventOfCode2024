@@ -1,3 +1,5 @@
+using BenchmarkDotNet.Attributes;
+
 namespace AdventOfCode2024;
 
 public class Day4 : IAocDay
@@ -125,4 +127,10 @@ public class Day4 : IAocDay
 
         return false;
     }
+    
+    [Benchmark]
+    public void BenchmarkPart1()=> Day4.RunPart1();
+    
+    [Benchmark]
+    public void BenchmarkPart2()=> Day4.RunPart2();
 }

@@ -1,10 +1,8 @@
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Filters;
-using BenchmarkDotNet.Running;
 
 namespace AdventOfCode2024;
 
+[MemoryDiagnoser]
 public class Day6 : IAocDay
 {
     private static string[] _input;
@@ -203,8 +201,8 @@ public class Day6 : IAocDay
     }
 
     [Benchmark]
-    public void BenchMarkPart1() => Day6.RunPart1();
+    public void BenchmarkPart1() => Day6.RunPart1();
 
     [Benchmark]
-    public void BenchMarkPart2() => Day6.RunPart2();
+    public void BenchmarkPart2() => Day6.RunPart2();
 }

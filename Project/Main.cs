@@ -66,7 +66,7 @@ public class EntryPoint
                 return;
             }
 
-            string benchmarkName = $"BenchMarkPart{part}";
+            string benchmarkName = $"BenchmarkPart{part}";
 
             Console.WriteLine($"Running benchmark for Day {day}, Part {part} ({benchmarkName})");
 
