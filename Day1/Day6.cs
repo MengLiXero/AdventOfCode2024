@@ -1,65 +1,61 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Filters;
 using BenchmarkDotNet.Running;
+
 namespace AdventOfCode2024;
 
-public class Day6
+public class Day6 : IAocDay
 {
-    private static string[] input;
-    private static char[][] grid;
-    private static HashSet<int> obstaclesVisited = new();
-    private static HashSet<int> visited = new();
-    private static bool isStuck;
+    private static string[] _input;
+    private static char[][] _grid;
+    private static readonly HashSet<int> ObstaclesVisited = new();
+    private static readonly HashSet<int> Visited = new();
+    private static bool _isStuck;
+    private static int _benchMarkNumber;
 
-    [Benchmark]
-    public void Index()
+    private static void Initialize()
     {
-        input = File.ReadAllLines("../../../../../../../data-aoc-day6.txt");
-        grid = input.Select(line => line.ToCharArray()).ToArray();
-        // part1();
-        part2();
+        _input = File.ReadAllLines(Constants.baseDir + "data-aoc-day6.txt");
+        _grid = _input.Select(line => line.ToCharArray()).ToArray();
     }
 
-    private static void part1()
+    public static void RunPart1()
     {
+        // if(_input == null)
+        // {
+        Initialize();
+        // }
         bool isContinue = true;
-        int sum = 0;
         int num = 0;
-        while (isContinue && !isStuck)
+        while (isContinue && !_isStuck)
         {
             bool roundTerminated = false;
-            for (int i = 0; i < grid.Length && !roundTerminated; i++)
+            for (int i = 0; i < _grid.Length && !roundTerminated; i++)
             {
-                for (int j = 0; j < grid[i].Length && !roundTerminated; j++)
+                for (int j = 0; j < _grid[i].Length && !roundTerminated; j++)
                 {
-                    switch (grid[i][j])
+                    switch (_grid[i][j])
                     {
                         case '^':
                         {
                             for (int k = i - 1; k > -1; k--)
                             {
-                                if (k == 0 && grid[k][j] != '#')
+                                if (k == 0 && _grid[k][j] != '#')
                                 {
-                                    grid[k + 1][j] = 'X';
-                                    grid[k][j] = 'X';
-                                    visited.Add(HashCode.Combine(k + 1, j));
-                                    visited.Add(HashCode.Combine(k, j));
-                                    sum = sum + 2;
+                                    RecordVisit(k + 1, j);
+                                    RecordVisit(k, j);
                                     isContinue = false;
                                     break;
                                 }
-                                else if (grid[k][j] != '#')
+                                else if (_grid[k][j] != '#')
                                 {
-                                    if (grid[k + 1][j] != 'X')
-                                    {
-                                        grid[k + 1][j] = 'X';
-                                        visited.Add(HashCode.Combine(k + 1, j));
-                                        sum++;
-                                    }
+                                    RecordVisit(k + 1, j);
                                 }
                                 else
                                 {
-                                    isStuck = !(obstaclesVisited.Add(HashCode.Combine(k + 1, j, '^')));
-                                    grid[k + 1][j] = '>';
+                                    _isStuck = !(ObstaclesVisited.Add(HashCode.Combine(k + 1, j, '^')));
+                                    _grid[k + 1][j] = '>';
 
                                     break;
                                 }
@@ -71,31 +67,23 @@ public class Day6
 
                         case '>':
                         {
-                            for (int k = j + 1; k < grid[i].Length; k++)
+                            for (int k = j + 1; k < _grid[i].Length; k++)
                             {
-                                if (k == grid[i].Length - 1 && grid[i][k] != '#')
+                                if (k == _grid[i].Length - 1 && _grid[i][k] != '#')
                                 {
-                                    grid[i][k - 1] = 'X';
-                                    grid[i][k] = 'X';
-                                    visited.Add(HashCode.Combine(i, k - 1));
-                                    visited.Add(HashCode.Combine(i, k));
-                                    sum = sum + 2;
+                                    RecordVisit(i, k - 1);
+                                    RecordVisit(i, k);
                                     isContinue = false;
                                     break;
                                 }
-                                else if (grid[i][k] != '#')
+                                else if (_grid[i][k] != '#')
                                 {
-                                    if (grid[i][k - 1] != 'X')
-                                    {
-                                        grid[i][k - 1] = 'X';
-                                        visited.Add(HashCode.Combine(i, k - 1));
-                                        sum++;
-                                    }
+                                    RecordVisit(i, k - 1);
                                 }
                                 else
                                 {
-                                    isStuck = !(obstaclesVisited.Add(HashCode.Combine(i, k - 1, '>')));
-                                    grid[i][k - 1] = 'v';
+                                    _isStuck = !(ObstaclesVisited.Add(HashCode.Combine(i, k - 1, '>')));
+                                    _grid[i][k - 1] = 'v';
                                     break;
                                 }
                             }
@@ -106,31 +94,23 @@ public class Day6
 
                         case 'v':
                         {
-                            for (int k = i + 1; k < grid.Length; k++)
+                            for (int k = i + 1; k < _grid.Length; k++)
                             {
-                                if (k == grid.Length - 1 && grid[k][j] != '#')
+                                if (k == _grid.Length - 1 && _grid[k][j] != '#')
                                 {
-                                    grid[k - 1][j] = 'X';
-                                    grid[k][j] = 'X';
-                                    visited.Add(HashCode.Combine(k - 1, j));
-                                    visited.Add(HashCode.Combine(k, j));
+                                    RecordVisit(k - 1, j);
+                                    RecordVisit(k, j);
                                     isContinue = false;
-                                    sum = sum + 2;
                                     break;
                                 }
-                                else if (grid[k][j] != '#')
+                                else if (_grid[k][j] != '#')
                                 {
-                                    if (grid[k - 1][j] != 'X')
-                                    {
-                                        grid[k - 1][j] = 'X';
-                                        visited.Add(HashCode.Combine(k - 1, j));
-                                        sum++;
-                                    }
+                                    RecordVisit(k - 1, j);
                                 }
                                 else
                                 {
-                                    isStuck = !(obstaclesVisited.Add(HashCode.Combine(k - 1, j, 'v')));
-                                    grid[k - 1][j] = '<';
+                                    _isStuck = !(ObstaclesVisited.Add(HashCode.Combine(k - 1, j, 'v')));
+                                    _grid[k - 1][j] = '<';
                                     break;
                                 }
                             }
@@ -142,29 +122,21 @@ public class Day6
                         {
                             for (int k = j - 1; k > -1; k--)
                             {
-                                if (k == 0 && grid[i][k] != '#')
+                                if (k == 0 && _grid[i][k] != '#')
                                 {
-                                    grid[i][k + 1] = 'X';
-                                    grid[i][k] = 'X';
-                                    visited.Add(HashCode.Combine(i, k + 1));
-                                    visited.Add(HashCode.Combine(i, k));
-                                    sum = sum + 2;
+                                    RecordVisit(i, k + 1);
+                                    RecordVisit(i, k);
                                     isContinue = false;
                                     break;
                                 }
-                                else if (grid[i][k] != '#')
+                                else if (_grid[i][k] != '#')
                                 {
-                                    if (grid[i][k + 1] != 'X')
-                                    {
-                                        grid[i][k + 1] = 'X';
-                                        visited.Add(HashCode.Combine(i, k + 1));
-                                        sum++;
-                                    }
+                                    RecordVisit(i, k + 1);
                                 }
                                 else
                                 {
-                                    isStuck = !(obstaclesVisited.Add(HashCode.Combine(i, k + 1, '<')));
-                                    grid[i][k + 1] = '^';
+                                    _isStuck = !(ObstaclesVisited.Add(HashCode.Combine(i, k + 1, '<')));
+                                    _grid[i][k + 1] = '^';
                                     break;
                                 }
                             }
@@ -177,47 +149,62 @@ public class Day6
             }
 
             // Console.WriteLine("Round: " + num);
-            // if (num == 10000)
-            // {
-            //     Console.WriteLine("here");
-            // }
             num++;
+            // foreach (var c in grid)
+            // {
+            //     Console.WriteLine(string.Join(" ", c));
+            // }
         }
 
-        // Console.WriteLine("Number of positions the guard visited: " + sum);
+        Console.WriteLine("Number of positions the guard visited: " + Visited.Count);
     }
 
-    private static void part2()
+    private static void RecordVisit(int k, int j)
     {
-        part1();
-        grid = input.Select(line => line.ToCharArray()).ToArray();
+        _grid[k][j] = 'X';
+        Visited.Add(HashCode.Combine(k, j));
+    }
+
+    public static void RunPart2()
+    {
+        Initialize();
+        RunPart1();
+        _grid = _input.Select(line => line.ToCharArray()).ToArray();
         var sum = 0;
-        for (int i = 0; i < grid.Length; i++)
+        for (int i = 0; i < _grid.Length; i++)
         {
-            for (int j = 0; j < grid[i].Length; j++)
+            for (int j = 0; j < _grid[i].Length; j++)
             {
-                if (visited.Add(HashCode.Combine(i, j)))
+                if (Visited.Add(HashCode.Combine(i, j)))
                 {
                     // Console.WriteLine("Skipping: " + i + " " + j);
                     continue;
                 }
-                if (grid[i][j] != '#' &&
-                    (grid[i][j] != '^' && grid[i][j] != '>' && grid[i][j] != 'v' && grid[i][j] != '<'))
+
+                if (_grid[i][j] != '#' &&
+                    (_grid[i][j] != '^' && _grid[i][j] != '>' && _grid[i][j] != 'v' && _grid[i][j] != '<'))
                 {
-                    grid[i][j] = '#';
+                    _grid[i][j] = '#';
                     // Console.WriteLine("Obstacle at: " + i + " " + j);
-                    part1();
-                    if (isStuck)
+                    RunPart1();
+                    if (_isStuck)
                     {
                         sum++;
                     }
-                    grid = input.Select(line => line.ToCharArray()).ToArray();
-                    isStuck = false;
-                    obstaclesVisited.Clear();
+
+                    _grid = _input.Select(line => line.ToCharArray()).ToArray();
+                    _isStuck = false;
+                    ObstaclesVisited.Clear();
                 }
             }
         }
-        
+
         Console.WriteLine("Number of positions can stuck the guard: " + sum);
     }
+
+    [Benchmark]
+    public void BenchMarkPart1() => Day6.RunPart1();
+
+    [Benchmark]
+    public void BenchMarkPart2() => Day6.RunPart2();
 }
