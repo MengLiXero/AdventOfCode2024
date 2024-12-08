@@ -19,9 +19,13 @@ public class EntryPoint
             // ("Run Day4 Part 2", Day4.RunPart2),
             // ("Run Day5 Part 1", Day5.RunPart1),
             // ("Run Day5 Part 2", Day5.RunPart2),
+            ("Run Benchmark", () => ChooseBenchmarkToRun()),
             ("Run Day6 Part 1", Day6.RunPart1),
             ("Run Day6 Part 2", Day6.RunPart2),
-            ("Run Benchmark", () => ChooseBenchmarkToRun())
+            ("Run Day7 Part 1", Day7.RunPart1),
+            ("Run Day7 Part 2", Day7.RunPart2),
+            ("Run Day8 Part 1", Day8.RunPart1),
+            ("Run Day8 Part 2", Day8.RunPart2)
         };
 
         Console.WriteLine("Select an option to run:");
