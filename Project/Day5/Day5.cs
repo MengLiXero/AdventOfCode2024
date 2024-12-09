@@ -9,12 +9,12 @@ public class Day5 : IAocDay
     private static string[] _input;
     private static List<int> _leftList = new();
     private static List<int> _rightList = new();
-    private static int[] _leftArray;
-    private static int[] _rightArray;
     private static int[][] _dataArray;
-    private static List<int> _sortedList = new ();
-    private static Dictionary<int,int> occurences = new();
     private static int lastValue = -1;
+    private static int sum;
+    private static bool found = false;
+    private static List<int[]> reOrderedList = new();
+    private static bool modified;
 
     private static void Initialize()
     {
@@ -30,70 +30,85 @@ public class Day5 : IAocDay
             }
         }
 
-        _dataArray = _input.Where(line=>line.IndexOf(',') != -1).Select(line =>
+        _dataArray = _input.Where(line => line.IndexOf(',') != -1).Select(line =>
             line.Split(',').Select(int.Parse).ToArray()).ToArray();
-        _leftArray = _leftList.ToArray();
-        _rightArray = _rightList.ToArray();
     }
 
     public static void RunPart1()
     {
         Initialize();
-        int result = 0;
-        foreach (var value in _leftArray)
-        {
-            occurences[value] = _rightArray.Count(x => x == value);
-        }
-
-        //Check if it's a loop
-        var firstValue = _leftArray.Except(_rightArray).ToList().Single();
-        var lastValue = _rightArray.Except(_leftArray).ToList().Single();
-        _sortedList.Add(firstValue);
-        
-        FindNextSmallest(firstValue,0);
-        _sortedList.Add(lastValue);
-        // _sortedList.ForEach(Console.WriteLine);
-        Dictionary<int,int> _sortedDict = _sortedList.Select((value, index) => new {value, index})
-            .ToDictionary(x => x.value, x => x.index);
         foreach (var line in _dataArray)
         {
-            int[] order = line.Select(x=>_sortedDict[x]).ToArray();
-            if (order.Zip(order.Skip(1), (a, b) => a <= b).All(x => x))
+            for (int i = 0; i < line.Length - 1; i++)
             {
-                if (line.Length % 2 == 0)
+                if (FindMatch(line, i, 0))
                 {
-                    throw new DataException("the length of the list to be compared is not an odd number");
+                    found = true;
+                    break;
                 }
-                result += line[line.Length / 2];
             }
+            if (!found)
+            {
+                sum += line[line.Length / 2];
             }
-        Console.WriteLine($"The result is : {result}");
+            found = false;
+        }
+
+        Console.WriteLine(sum);
     }
 
-    private static void FindNextSmallest(int value, int startIndex)
+    private static bool FindMatch(int[] line, int i, int start)
     {
-        if(startIndex >= _leftList.Count)
-            return;
-        if(_sortedList.Count == _leftList.Count)
-            return;
-        if (_leftList.IndexOf(value, startIndex) == -1)
-            return;
-        var candidate = _rightList[_leftList.IndexOf(value, startIndex)];
-        if (occurences.ContainsKey(candidate)&&(occurences[candidate] <= _sortedList.Count))
+        var index = _leftList.IndexOf(line[i + 1], start);
+        if (index == -1 || start + 1 >= _leftList.Count || found)
         {
-            _sortedList.Add(candidate);
-            FindNextSmallest(candidate,0);
+            return false;
         }
-        else
+
+        if (_rightList[index] == line[i])
         {
-            FindNextSmallest(value, _leftList.IndexOf(value, startIndex) + 1);
+            return true;
         }
+
+        return FindMatch(line, i, index + 1);
     }
     
-
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Day 5, Part 2");
+        Initialize();
+        foreach (var line in _dataArray)
+        {
+            for (int i = 0; i < line.Length - 1; i++)
+            {
+                if (FindMatch(line, i, 0))
+                {
+                    Console.WriteLine($"line: {line.ToArray()}");
+                    modified = true;
+                    (line[i + 1], line[i]) = (line[i], line[i + 1]);
+                    if (FindMatch(line, i, 0))
+                    {
+                        reOrderedList.Remove(line);
+                        modified = false;
+                        Array.Resize(ref _dataArray, _dataArray.Length + 1);
+                        _dataArray[^1] = line;
+                        break;
+                    }
+                }
+            }
+            if (modified)
+            {
+                sum += line[line.Length / 2];
+            }
+            modified = false;
+        }
+
+        foreach (var array in reOrderedList)
+        {
+            Console.WriteLine(string.Join(", ", array));
+        }
+        
+        Console.WriteLine(sum);
     }
 
     [Benchmark]
