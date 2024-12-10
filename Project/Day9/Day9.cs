@@ -67,7 +67,6 @@ public class Day9 : IAocDay
         {
             if (blockViewArray[i].ID !=-1)
             {
-                
                 for (int j = leftStart; j < rightStart; j++)
                 {
                     if (blockViewArray[j].ID == -1)
