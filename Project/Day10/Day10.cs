@@ -1,12 +1,17 @@
 using System.Numerics;
+using BenchmarkDotNet.Attributes;
 
-namespace AdventOfCode2024.Day10;
+namespace AdventOfCode2024;
 
+[MemoryDiagnoser]
 public class Day10 : IAocDay
 {
     private static string[] _input;
     private static int[][] _grid;
     private static HashSet<int> summitVistedForAllTrailheads = new();
+    private static int _sum;
+    private static bool _isPartTwo;
+
     private static void Initialize()
     {
         _input = File.ReadAllLines(Constants.baseDir + "Day10/data-aoc-day10.txt");
@@ -21,10 +26,10 @@ public class Day10 : IAocDay
     public static void RunPart1()
     {
         Initialize();
-        foreach (var line in _grid)
-        {
-            Console.WriteLine(string.Join(" ",line));
-        }
+        // foreach (var line in _grid)
+        // {
+        //     Console.WriteLine(string.Join(" ",line));
+        // }
 
         for (int i = 0; i < _grid.Length; i++)
         {
@@ -38,15 +43,20 @@ public class Day10 : IAocDay
                 }
             }
         }
-        
-        Console.WriteLine(summitVistedForAllTrailheads.Count);
+        // if(_isPartTwo)
+        //     Console.WriteLine(_sum);
+        // else
+        //     Console.WriteLine(summitVistedForAllTrailheads.Count);
     }
 
     private static bool FindNext(int currentNumber, Vector2 location, Vector2 startLocation)
     {
         if (currentNumber == 9)
         {
-            summitVistedForAllTrailheads.Add(HashCode.Combine((int)location.X, (int)location.Y,(int)startLocation.X,(int)startLocation.Y));
+            if(_isPartTwo)
+                _sum++;
+            else
+                summitVistedForAllTrailheads.Add(HashCode.Combine((int)location.X, (int)location.Y,(int)startLocation.X,(int)startLocation.Y));
             return true; 
         }
 
@@ -76,18 +86,16 @@ public class Day10 : IAocDay
 
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        _isPartTwo = true;
+        RunPart1();
     }
 
-    public void BenchmarkPart1()
-    {
-        throw new NotImplementedException();
-    }
+    [Benchmark]
+    public void BenchmarkPart1()=> RunPart1();
 
-    public void BenchmarkPart2()
-    {
-        throw new NotImplementedException();
-    }
+    [Benchmark]
+    public void BenchmarkPart2()=> RunPart2();
+    
     
     private static int[][] AddBorder(int boarderNumber = -1)
     {
