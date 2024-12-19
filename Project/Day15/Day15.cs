@@ -13,7 +13,7 @@ public class Day15 : Grid, IAocDay
 
     private static void Initialize()
     {
-        _charGrid = PopulateGrid<char>(File.ReadAllLines(Constants.baseDir + "Day15/data-aoc-day15.txt"),"char");
+        _charGrid = PopulateGrid<char>(File.ReadAllLines(Constants.baseDir + "Day15/data-aoc-day15.txt"),GridType.Char);
         PrintGrid(_charGrid);
         _movement = LoadAndPrintCharArray("Day15/data-aoc-day15-2.txt");
     }
@@ -58,7 +58,7 @@ public class Day15 : Grid, IAocDay
                 .Replace("@", "@.");
         }
 
-        return PopulateGrid<char>(input, "char");
+        return PopulateGrid<char>(input, GridType.Char);
     }
 
     private static void MoveRobot(Move MoveOnGrid)

@@ -1,4 +1,5 @@
 using System.Numerics;
+using AdventOfCode2024.Day16;
 
 namespace AdventOfCode2024;
 
@@ -6,11 +7,17 @@ public abstract class Grid
 {
     protected static List<(int, int)> _baseVisited = new List<(int, int)>();
 
-    protected static T[][] PopulateGrid<T>(string[] input, string gridType)
+    protected static Dictionary<(int, int), DirectionType> directionMap = new Dictionary<(int, int), DirectionType>()
+    {
+        { (-1, 0), DirectionType.Up }, { (1, 0), DirectionType.Down }, { (0, -1), DirectionType.Left },
+        { (0, 1), DirectionType.Right }
+    };
+
+    protected static T[][] PopulateGrid<T>(string[] input, GridType gridType)
     {
         switch (gridType)
         {
-            case "int":
+            case GridType.Int:
                 if (typeof(T) == typeof(int) &&
                     input.All(line => line.Split(' ').All(value => int.TryParse(value, out _))))
                 {
@@ -24,7 +31,7 @@ public abstract class Grid
 
                 break;
 
-            case "char":
+            case GridType.Char:
                 if (typeof(T) == typeof(char))
                 {
                     return input
@@ -47,7 +54,7 @@ public abstract class Grid
         {
             for (int i = 0; i < grid.Length; i++)
             {
-                Console.Write(i);
+                // Console.Write(i);
                 Console.WriteLine(string.Join("", grid[i]));
             }
         }
@@ -147,5 +154,141 @@ public abstract class Grid
         }
 
         return false;
+    }
+
+    protected static int DijkstraShortestDistanceInWeightedGraph(char[][] grid, (int, int) start, (int, int) end)
+    {
+        var directions = new List<(int row, int col)>()
+        {
+            (0, 1),
+            (0, -1),
+            (1, 0),
+            (-1, 0)
+        };
+        var visited = new HashSet<(int, int)>();
+        var priorityQueue = new PriorityQueue<Node,int>();
+        var predecessors = new Dictionary<(int,int), (int,int)>();
+        var allNodes = new Dictionary<(int, int), Node>();
+        for (int i = 0; i < grid.Length; i++)
+        {
+            for (int j = 0; j < grid[i].Length; j++)
+                if (grid[i][j] == '.' || grid[i][j] == 'S' || grid[i][j] == 'E')
+                {
+                    var currentNode = new Node(i, j, int.MaxValue, null, DirectionType.None);
+                    allNodes.Add((i, j), currentNode);
+                }
+        }
+
+        allNodes[start].Distance = 0;
+        allNodes[start].Direction = DirectionType.Right;
+        var current = allNodes[start];
+        var next = (-1, -1);
+        priorityQueue.Enqueue(current, current.Distance);
+        while (true)
+        {
+            if (priorityQueue.Count == 0)
+            {
+                throw new Exception("No path found");
+            }
+            current = priorityQueue.Dequeue();
+            if ((current.Row,current.Col) == end)
+            {
+                break;
+            }
+            visited.Add((current.Row, current.Col));
+            foreach (var dir in directions)
+            {
+                next = (current.Row + dir.row, current.Col + dir.col);
+                
+                if (allNodes.ContainsKey(next) && !visited.Contains(next))
+                {
+                    if (current.Direction == DirectionType.None || current.Direction == directionMap[dir])
+                    {
+                        if (allNodes[next].Distance > current.Distance + 1)
+                        {
+                            allNodes[next].Distance = current.Distance + 1;
+                            if(predecessors.ContainsKey((next.Item1,next.Item2)))
+                                predecessors[(next.Item1,next.Item2)] = (current.Row,current.Col);
+                            else
+                                predecessors.Add((next.Item1,next.Item2), (current.Row,current.Col));
+                            allNodes[next].Direction = directionMap[dir];
+                            priorityQueue.Enqueue(allNodes[next], allNodes[next].Distance);
+                        }
+                    }
+                    else
+                    {
+                        if (allNodes[next].Distance > current.Distance + 1001)
+                        {
+                            allNodes[next].Distance = current.Distance + 1001;
+                            if (predecessors.ContainsKey((next.Item1, next.Item2)))
+                            {
+                                predecessors[(next.Item1, next.Item2)] = (current.Row, current.Col);
+                            }else
+                                predecessors.Add((next.Item1,next.Item2), (current.Row,current.Col));
+                            allNodes[next].Direction = directionMap[dir];
+                            priorityQueue.Enqueue(allNodes[next], allNodes[next].Distance);
+                        }
+                    }
+                }
+            }
+        }
+        grid = CombineRouteAndGrid(grid, allNodes,RetrieveRoute(predecessors, end));
+        PrintGrid(grid);
+        return allNodes[end].Distance;
+    }
+
+    private static char[][] CombineRouteAndGrid(char[][] grid, Dictionary<(int, int), Node> allNodes, IEnumerable<(int, int)> route)
+    {
+        if (grid != null)
+        {
+            for (int i = 0; i < grid.Length; i++)
+            {
+                for(int j = 0; j < grid[i].Length; j++)
+                {
+                    if (route.Contains((i, j)) && grid[i][j]!='S' && grid[i][j]!='E')
+                    {
+                        switch (allNodes[(i, j)].Direction)
+                        {
+                            case DirectionType.Up:
+                                grid[i][j] = '^';
+                                break;
+                            case DirectionType.Down:
+                                grid[i][j] = 'v';
+                                break;
+                            case DirectionType.Left:
+                                grid[i][j] = '<';
+                                break;
+                            case DirectionType.Right:
+                                grid[i][j] = '>';
+                                break;
+                            default:
+                                grid[i][j] = '.';
+                                break;
+                        }
+                    }
+                }
+                
+            }
+        }
+
+        return grid;
+    }
+
+    private static IEnumerable<(int, int)> RetrieveRoute(Dictionary<(int, int), (int, int)> predecessors, (int, int) end)
+    {
+        var route = new List<(int, int)>();
+        var current = end;
+        var isContinue = true;
+        while (isContinue)
+        {
+            route.Add(current);
+            if (predecessors.ContainsKey(current))
+                current = predecessors[current];
+            else
+                isContinue = false;
+        }
+
+        route.Reverse();
+        return route;
     }
 }
