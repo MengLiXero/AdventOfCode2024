@@ -13,6 +13,10 @@ public abstract class Grid
         { (0, 1), DirectionType.Right }
     };
 
+    protected static int _routeCellNumber;
+    protected static bool _part2;
+    private static List<Dictionary<(int,int),(int,int)>> _allRoutePredecessors = new List<Dictionary<(int, int), (int, int)>>();
+
     protected static T[][] PopulateGrid<T>(string[] input, GridType gridType)
     {
         switch (gridType)
@@ -182,18 +186,47 @@ public abstract class Grid
         allNodes[start].Distance = 0;
         allNodes[start].Direction = DirectionType.Right;
         var current = allNodes[start];
+        var minDistance = int.MaxValue;
         var next = (-1, -1);
         priorityQueue.Enqueue(current, current.Distance);
         while (true)
         {
             if (priorityQueue.Count == 0)
             {
+                if (_part2)
+                {
+                    break;
+                }
                 throw new Exception("No path found");
             }
             current = priorityQueue.Dequeue();
+            Console.WriteLine($"Dequeued: {current.Row},{current.Col}");
+            Console.WriteLine($"Number of priorityQueue members: {priorityQueue.Count}");
+
+            if (current.Row == 11 && current.Col == 2)
+            {
+                Console.WriteLine("here");
+            }
+            
+            if (current.Row == 9 && current.Col == 2)
+            {
+                Console.WriteLine("here");
+            }
+            
             if ((current.Row,current.Col) == end)
             {
-                break;
+                if(minDistance == int.MaxValue)
+                    minDistance = current.Distance;
+                if (_part2 && allNodes[end].Distance == minDistance)
+                {
+                    visited.Clear();
+                    _allRoutePredecessors.Add(predecessors);
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
             visited.Add((current.Row, current.Col));
             foreach (var dir in directions)
@@ -213,6 +246,11 @@ public abstract class Grid
                                 predecessors.Add((next.Item1,next.Item2), (current.Row,current.Col));
                             allNodes[next].Direction = directionMap[dir];
                             priorityQueue.Enqueue(allNodes[next], allNodes[next].Distance);
+                            Console.WriteLine($"Enqueued: {next.Item1},{next.Item2}");
+                            if (next.Item1 == 11 && next.Item2 == 2)
+                            {
+                                Console.WriteLine("here");
+                            }
                         }
                     }
                     else
@@ -227,6 +265,11 @@ public abstract class Grid
                                 predecessors.Add((next.Item1,next.Item2), (current.Row,current.Col));
                             allNodes[next].Direction = directionMap[dir];
                             priorityQueue.Enqueue(allNodes[next], allNodes[next].Distance);
+                            Console.WriteLine($"Enqueued: {next.Item1},{next.Item2}");
+                            if (next.Item1 == 11 && next.Item2 == 2)
+                            {
+                                Console.WriteLine("here");
+                            }
                         }
                     }
                 }
@@ -288,6 +331,7 @@ public abstract class Grid
                 isContinue = false;
         }
 
+        _routeCellNumber = route.Count;
         route.Reverse();
         return route;
     }

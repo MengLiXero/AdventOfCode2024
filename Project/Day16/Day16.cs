@@ -25,7 +25,9 @@ public class Day16 : Grid, IAocDay
 
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        _part2 = true;
+        RunPart1();
+        Console.WriteLine($"Number of cells on the route: {_routeCellNumber}");
     }
 
     public void BenchmarkPart1()
