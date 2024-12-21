@@ -335,4 +335,70 @@ public abstract class Grid
         route.Reverse();
         return route;
     }
+    
+    protected static (int, Dictionary<(int,int),List<(int,int)>>) BfsFindingAllShortestDistance(char[][] grid, (int, int) start, (int, int) destination, char wall = '#')
+    {
+        var visited = new Dictionary<(int, int),int>();
+        Dictionary<(int,int),List<(int,int)>> predecessors = new Dictionary<(int, int), List<(int, int)>>();
+        var startNode = (row: start.Item1, col: start.Item2, steps: 0);
+        visited.Add((startNode.row, startNode.col),0);
+        var queue = new Queue<(int row, int col, int steps)>();
+        queue.Enqueue(startNode);
+        var directions = new List<(int row, int col)>()
+        {
+            (0, 1),
+            (0, -1),
+            (1, 0),
+            (-1, 0)
+        };
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            if (current.row == destination.Item1 && current.col == destination.Item2)
+            {
+                return (current.steps, predecessors);
+            }
+
+            foreach (var dir in directions)
+            {
+                if (grid[current.row + dir.row][current.col + dir.col] == wall)
+                    continue;
+                var next = (current.row + dir.row, current.col + dir.col, current.steps + 1);
+                if (visited.ContainsKey((next.Item1, next.Item2)))
+                {
+                    if(visited[(next.Item1, next.Item2)] == next.Item3)
+                    {
+                        predecessors[(next.Item1,next.Item2)].Add((current.row,current.col));
+                    }
+                    continue;
+                }
+                queue.Enqueue(next);
+                predecessors.Add((next.Item1,next.Item2), new List<(int, int)>{(current.row,current.col)});
+                visited.Add((next.Item1, next.Item2), next.Item3);
+            }
+        }
+        return (-1, predecessors);
+    }
+
+    protected static List<List<(int, int)>> RetrieveRouteUsingRecursion(
+        Dictionary<(int, int), List<(int, int)>> predecessors, List<(int, int)> route, (int, int) end,
+        List<List<(int, int)>> allRoutes)
+    {
+        var current = end;
+        route.Add(current);
+        if (!predecessors.ContainsKey(current))
+        {
+            var newRoute = new List<(int, int)>(route);
+            newRoute.Reverse();
+            allRoutes.Add(newRoute);
+            return allRoutes;
+        }
+        foreach (var predecessor in predecessors[current])
+        { 
+            var newRoute = new List<(int, int)>(route);
+            RetrieveRouteUsingRecursion(predecessors, newRoute, predecessor, allRoutes);
+        }
+
+        return allRoutes;
+    }
 }
