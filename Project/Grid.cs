@@ -280,7 +280,125 @@ public abstract class Grid
         return allNodes[end].Distance;
     }
 
-    private static char[][] CombineRouteAndGrid(char[][] grid, Dictionary<(int, int), Node> allNodes, IEnumerable<(int, int)> route)
+    protected static int DijkstraAllShortestDistanceInWeightedGraph(char[][] grid, (int, int) start, (int, int) end)
+    {
+        var directions = new List<(int row, int col)>()
+        {
+            (0, 1),
+            (0, -1),
+            (1, 0),
+            (-1, 0)
+        };
+        var visited = new HashSet<(int, int)>();
+        var priorityQueue = new PriorityQueue<Node,int>();
+        var predecessors = new Dictionary<(int,int), List<(int,int)>>();
+        var allNodes = new Dictionary<(int, int), Node>();
+        for (int i = 0; i < grid.Length; i++)
+        {
+            for (int j = 0; j < grid[i].Length; j++)
+                if (grid[i][j] == '.' || grid[i][j] == 'S' || grid[i][j] == 'E')
+                {
+                    var currentNode = new Node(i, j, int.MaxValue, null, DirectionType.None);
+                    allNodes.Add((i, j), currentNode);
+                }
+        }
+
+        allNodes[start].Distance = 0;
+        allNodes[start].Direction = DirectionType.Right;
+        var current = allNodes[start];
+        var next = (-1, -1);
+        priorityQueue.Enqueue(current, current.Distance);
+        while (true)
+        {
+            if (priorityQueue.Count == 0)
+            {
+                break;
+            }
+            current = priorityQueue.Dequeue();
+            Console.WriteLine($"Dequeued: {current.Row},{current.Col}");
+            Console.WriteLine($"Number of priorityQueue members: {priorityQueue.Count}");
+
+            if (current.Row == 11 && current.Col == 2)
+            {
+                Console.WriteLine("here");
+            }
+            
+            if (current.Row == 9 && current.Col == 2)
+            {
+                Console.WriteLine("here");
+            }
+            
+            if ((current.Row,current.Col) == end)
+            {
+                break;
+            }
+            visited.Add((current.Row, current.Col));
+            foreach (var dir in directions)
+            {
+                next = (current.Row + dir.row, current.Col + dir.col);
+                if(next.Item1 == 9 && next.Item2 == 3)
+                {
+                    Console.WriteLine("here");
+                }
+                if (allNodes.ContainsKey(next))
+                {
+                    if (current.Direction == DirectionType.None || current.Direction == directionMap[dir])
+                    {
+                        if (allNodes[next].Distance >= current.Distance + 1)
+                        {
+                            allNodes[next].Distance = current.Distance + 1;
+                            if(predecessors.ContainsKey((next.Item1,next.Item2)))
+                                predecessors[(next.Item1,next.Item2)].Add((current.Row,current.Col));
+                            else
+                                predecessors.Add((next.Item1,next.Item2), new List<(int, int)>(){(current.Row,current.Col)});
+                            allNodes[next].Direction = directionMap[dir];
+                            Console.WriteLine($"Enqueued: {next.Item1},{next.Item2}");
+                            if (next.Item1 == 11 && next.Item2 == 2)
+                            {
+                                Console.WriteLine("here");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (allNodes[next].Distance >= current.Distance + 1001)
+                        {
+                            allNodes[next].Distance = current.Distance + 1001;
+                            if(predecessors.ContainsKey((next.Item1,next.Item2)))
+                                predecessors[(next.Item1,next.Item2)].Add((current.Row,current.Col));
+                            else
+                                predecessors.Add((next.Item1,next.Item2), new List<(int, int)>(){(current.Row,current.Col)});
+                            allNodes[next].Direction = directionMap[dir];
+                            Console.WriteLine($"Enqueued: {next.Item1},{next.Item2}");
+                            if (next.Item1 == 11 && next.Item2 == 2)
+                            {
+                                Console.WriteLine("here");
+                            }
+                        }
+                    }
+                    if(!visited.Contains((current.Row,current.Col)))
+                        priorityQueue.Enqueue(allNodes[next], allNodes[next].Distance);
+                }
+            }
+        }
+
+        var allRoutesList = RetrieveRouteUsingRecursion(predecessors, new List<(int, int)>() { }, end,
+            new List<List<(int, int)>>() { });
+        HashSet<(int,int)> allRoutesCells = new HashSet<(int, int)>();
+        foreach (var route in allRoutesList)
+        {
+            foreach (var cell in route)
+            {
+                allRoutesCells.Add(cell);
+            }
+        } 
+            
+        grid = CombineRouteAndGrid(grid, allNodes,allRoutesCells.ToList());
+        PrintGrid(grid);
+        return allNodes[end].Distance;
+    }
+
+    private static char[][] CombineRouteAndGrid(char[][] grid, Dictionary<(int, int), Node> allNodes, List<(int, int)> route)
     {
         if (grid != null)
         {
@@ -317,7 +435,7 @@ public abstract class Grid
         return grid;
     }
 
-    private static IEnumerable<(int, int)> RetrieveRoute(Dictionary<(int, int), (int, int)> predecessors, (int, int) end)
+    private static List<(int, int)> RetrieveRoute(Dictionary<(int, int), (int, int)> predecessors, (int, int) end)
     {
         var route = new List<(int, int)>();
         var current = end;

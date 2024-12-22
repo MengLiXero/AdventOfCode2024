@@ -25,9 +25,13 @@ public class Day16 : Grid, IAocDay
 
     public static void RunPart2()
     {
-        _part2 = true;
-        RunPart1();
-        Console.WriteLine($"Number of cells on the route: {_routeCellNumber}");
+        Initialize();
+        var startPosition = LocateAValue(_grid, 'S');
+        var endPosition = LocateAValue(_grid, 'E');
+        var start = ((int)startPosition.X, (int)startPosition.Y);
+        var end = ((int)endPosition.X, (int)endPosition.Y);
+        var minScore = DijkstraAllShortestDistanceInWeightedGraph(_grid,start, end);
+        Console.WriteLine($"Minimum score: {minScore}");
     }
 
     public void BenchmarkPart1()
