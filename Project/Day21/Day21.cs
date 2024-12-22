@@ -1,17 +1,20 @@
 using System.Numerics;
 using System.Text.RegularExpressions;
 
-namespace AdventOfCode2024.Day21;
+namespace AdventOfCode2024;
 
 public class Day21 : Grid, IAocDay
 {
     private static char[][] _numericKeyPadGrid;
-    private static List<char[]> _robotTwoOutput;
+    private static List<char[]> _robotTwoOutputs;
     private static List<char[]> _robotThreeOutput;
     private static List<char[]> _humanOutput;
     private static List<char[]> _robotOneOutputList;
     private static char[][] _directionalKeyPadGrid;
     private static int _sum;
+    private static Dictionary<((char,char),int),long> _memo = new Dictionary<((char, char), int), long>();
+    private static long _sum2;
+    private const int TotalDirectionalKeyPadRobots = 25;
 
 
     public static void RunPart1()
@@ -19,9 +22,9 @@ public class Day21 : Grid, IAocDay
         Initialize();
         foreach (var robotOneOutput in _robotOneOutputList)
         {
-            _robotTwoOutput = GetNextRobotOutput(robotOneOutput, LocateAValue(_numericKeyPadGrid, 'A'), _numericKeyPadGrid);
+            _robotTwoOutputs = GetNextRobotOutput(robotOneOutput, LocateAValue(_numericKeyPadGrid, 'A'), _numericKeyPadGrid);
             var shortestSequence = int.MaxValue;
-            foreach (var robotTwoOutput in _robotTwoOutput)
+            foreach (var robotTwoOutput in _robotTwoOutputs)
             {
                 _robotThreeOutput = GetNextRobotOutput(robotTwoOutput, LocateAValue(_directionalKeyPadGrid, 'A'),
                     _directionalKeyPadGrid);
@@ -158,7 +161,83 @@ public class Day21 : Grid, IAocDay
 
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        Initialize();
+        foreach (var robotOneOutput in _robotOneOutputList)
+        {
+            _robotTwoOutputs = GetNextRobotOutput(robotOneOutput, LocateAValue(_numericKeyPadGrid, 'A'), _numericKeyPadGrid);
+        long min = long.MaxValue;
+        long sum = 0;
+            foreach (var robotTwoOutput in _robotTwoOutputs)
+            {
+                // var robotTwoOutput = new char[] { '<', 'A', '^', 'A', '>', '^', '^', 'A', 'v', 'v', 'v', 'A' };
+                sum = 0;
+                for(int i=0;i<robotTwoOutput.Length;i++)
+                {
+                    if (i == 0)
+                    {
+                        sum += CountMovesAfterNRobots(('A', robotTwoOutput[i]), TotalDirectionalKeyPadRobots);
+                    }
+                    else
+                    {
+                        sum += CountMovesAfterNRobots((robotTwoOutput[i-1], robotTwoOutput[i]), TotalDirectionalKeyPadRobots);
+                    }
+                    // Console.WriteLine($"Current i: {i}");
+                    // Console.WriteLine($"Current sum: {sum}");
+                }
+                
+                if(min>sum)
+                {
+                    min = sum;
+                }
+            }
+            Console.WriteLine($"Minimum number of moves after 3 robots: {min}");
+            string pattern = @"^\d+";
+            var match = Regex.Matches(new string(robotOneOutput), pattern)[0];
+            _sum2+= int.Parse(match.Value)*min;
+            Console.WriteLine($"Sum2 is {_sum2}");
+        }
+        // foreach (var kvp in _memo)
+        // {
+        //     var key = kvp.Key;
+        //     var value = kvp.Value;
+        //
+        //     Console.WriteLine($"Key: (({key.Item1.Item1}, {key.Item1.Item2}), {key.Item2}), Value: {value}");
+        // }
+    }
+    private static long CountMovesAfterNRobots((char,char) currentStep,int n)
+    {
+        //Base case
+        if (n == 0)
+        {
+            return 1;
+        }
+
+        // If the value is already calculated, return it
+        var key = (currentStep, n);
+        if (_memo.TryGetValue(key, out long numOfSteps))
+        {
+            return numOfSteps;
+        }
+        
+        var currentOutputUnitMapped = new char[]{currentStep.Item1, currentStep.Item2};
+        var nextRobotOutputs = GetNextRobotOutput(currentOutputUnitMapped, LocateAValue(_directionalKeyPadGrid, currentStep.Item1), _directionalKeyPadGrid);
+        long sum = 0;
+        long minimum = long.MaxValue;
+        foreach (var output in nextRobotOutputs)
+        { 
+            sum = 0;
+            for (int i = 0; i < output.Length-1; i++)
+            { 
+                sum += CountMovesAfterNRobots((output[i], output[i+1]), n-1);
+            }
+            if (minimum > sum)
+            {
+                minimum = sum;
+            }
+        }
+        _memo[key] = minimum;
+        
+        return minimum;
     }
 
     public void BenchmarkPart1()
