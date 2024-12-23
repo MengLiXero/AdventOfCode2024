@@ -69,7 +69,7 @@ public class Day21 : Grid, IAocDay
 
         for (int i = 1; i < routeLists.Count; i++)
         {
-            combinedRoutes = ListHelper.CombineTwoListsOfLists(combinedRoutes, routeLists[i]);
+            combinedRoutes = ICollectionHelper.CombineTwoListsOfLists(combinedRoutes, routeLists[i]);
         }
 
         // foreach (var routes in combinedRoutes)
