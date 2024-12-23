@@ -45,7 +45,7 @@ public class Day18 : Grid, IAocDay
             throw new Exception("Start/End point is corrupted");
         }
 
-        var minSteps = BfsFindingShortestDistance(_grid, (_grid.Length - 2, _grid[0].Length - 2));
+        var minSteps = BfsFindingShortestDistance(_grid, (1,1),(_grid.Length - 2, _grid[0].Length - 2));
         Console.WriteLine($"Minimum steps: {minSteps}");
     }
 

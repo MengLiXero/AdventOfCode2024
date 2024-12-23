@@ -7,7 +7,7 @@ public class Day16 : Grid, IAocDay
     private static void Initialize()
     {
         _input = File.ReadAllLines(Constants.baseDir + $"/Day16/data-aoc-day16.txt");
-        _grid = PopulateGrid<char>(_input, GridType.Char);
+        _grid = PopulateGrid<char>(_input);
         PrintGrid(_grid);
     }
 

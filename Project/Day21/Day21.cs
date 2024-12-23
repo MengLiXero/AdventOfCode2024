@@ -135,12 +135,12 @@ public class Day21 : Grid, IAocDay
     {
         var numericKeyPad = File.ReadAllLines(Constants.baseDir + "/Day21/data-aoc-day21-numeric-keypad.txt");
 
-        _numericKeyPadGrid = PopulateGrid<char>(numericKeyPad, GridType.Char);
+        _numericKeyPadGrid = PopulateGrid<char>(numericKeyPad);
         _numericKeyPadGrid = AddBoarder(_numericKeyPadGrid, '#');
         PrintGrid(_numericKeyPadGrid);
         
         var directionalKeyPad = File.ReadAllLines(Constants.baseDir + "/Day21/data-aoc-day21-directional-keypad.txt");
-        _directionalKeyPadGrid = PopulateGrid<char>(directionalKeyPad, GridType.Char);
+        _directionalKeyPadGrid = PopulateGrid<char>(directionalKeyPad);
         _directionalKeyPadGrid = AddBoarder(_directionalKeyPadGrid, '#');
         PrintGrid(_directionalKeyPadGrid);
 
