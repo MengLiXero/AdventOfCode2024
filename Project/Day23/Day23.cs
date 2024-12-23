@@ -8,6 +8,7 @@ public class Day23 : IAocDay
     private static Dictionary<string,HashSet<string>> _connections = new();
     private static readonly HashSet<HashSet<string>> ThreeInterConnectedComputers = new();
     private static readonly HashSet<HashSet<string>> ThreeInterConnectedComputersWithT = new();
+    private static HashSet<string> _largestInterConnectedGroup = new();
     private static void Initialize()
     {
         _input = File.ReadAllLines(Constants.baseDir + "Day23/data-aoc-day23.txt");
@@ -75,7 +76,50 @@ public class Day23 : IAocDay
 
     public static void RunPart2()
     {
-        throw new NotImplementedException();
+        Initialize();
+        FindLargestInterConnectedGroup();
+        List<string> largestInterConnectedGroupList = _largestInterConnectedGroup.OrderBy(name => name).ToList();
+        string password = string.Join(",", largestInterConnectedGroupList);
+        Console.WriteLine($"The password is: {password}");
+    }
+
+    private static void FindLargestInterConnectedGroup()
+    {
+        FindThreeInterConnectedComputers();
+        var maxConnectedGroupCount = -1;
+        foreach (var group in ThreeInterConnectedComputers)
+        {
+            foreach (var kvp in _connections)
+            {
+                if(group.Contains(kvp.Key))
+                {
+                    continue;
+                }
+                
+                var found = true;
+                foreach (var computer in group)
+                {
+                    if (!_connections[kvp.Key].Contains(computer))
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+
+                if (found)
+                {
+                    group.Add(kvp.Key);
+                }
+            }
+            if(maxConnectedGroupCount < group.Count)
+            {
+                maxConnectedGroupCount = group.Count;
+                _largestInterConnectedGroup.Clear();
+                _largestInterConnectedGroup = group;
+            }
+        }
+        
+        Console.WriteLine($"Max connected group count: {maxConnectedGroupCount}");
     }
 
     public void BenchmarkPart1()
