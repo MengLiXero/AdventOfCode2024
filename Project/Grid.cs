@@ -100,10 +100,6 @@ public abstract class Grid
         while (queue.Count > 0)
         {
             var current = queue.Dequeue();
-            if (current.row == end.Item1 && current.col == end.Item2)
-            {
-                return current.steps;
-            }
 
             foreach (var dir in directions)
             {
@@ -111,6 +107,10 @@ public abstract class Grid
                     continue;
                 var next = (current.row + dir.row, current.col + dir.col, current.steps + 1);
                 if (visited.Contains((next.Item1, next.Item2))) continue;
+                if (next.Item1== end.Item1 && next.Item2 == end.Item2)
+                {
+                    return next.Item3;
+                }
                 queue.Enqueue(next);
                 visited.Add((next.Item1, next.Item2));
             }
